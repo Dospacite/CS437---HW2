@@ -560,17 +560,16 @@ async def generate_tracking_urls(request: Request, dest: str = "https://example.
     # Detect base URL from request
     base_url = str(request.base_url).rstrip("/")
 
-    return {
+    return_dict = {
         "tracking_id": tracking_id,
         "sent_timestamp": sent_timestamp,
         "sent_time_human": datetime.fromtimestamp(sent_timestamp).isoformat(),
         "pixel_url": f"{base_url}/pixel/{tracking_id}?t={sent_timestamp}",
         "click_url": f"{base_url}/click/{tracking_id}?t={sent_timestamp}&dest={encoded_dest}",
-        "destination": dest,
-        "usage": {
-            "email": "<img src='{pixel_url}' width='1' height='1' style='display:none;' alt='' /><a href='{click_url}'>Click here</a>",
-        }
+        "destination": dest
     }
+    return_dict["usage"] = f"<img src='{return_dict['pixel_url']}' width='1' height='1' style='display:none;' alt=''><a href='{return_dict['click_url']}'>Click here</a>"
+    return return_dict
 
 
 @app.get("/stats/{tracking_id}")
