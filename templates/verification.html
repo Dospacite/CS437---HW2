@@ -5,111 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
     <style>
-        /*
-         * Verification Page Styles
-         * This page is shown briefly while JavaScript collects
-         * verification data to distinguish humans from bots.
-         */
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                         Oxygen, Ubuntu, Cantarell, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-        }
-
-        .container {
-            text-align: center;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Animated spinner */
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 500;
-            margin-bottom: 12px;
-        }
-
-        p {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
-        /* Progress bar */
-        .progress-container {
-            width: 200px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            margin: 20px auto 0;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: #fff;
-            width: 0%;
-            transition: width 2s linear;
-        }
-
-        /* Hidden debug info (can be shown for testing) */
-        .debug {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            text-align: left;
+            font-family: sans-serif;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="spinner"></div>
-        <h1>Please wait...</h1>
-        <p>You will be redirected shortly</p>
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-
-        <!-- Debug info (hidden by default) -->
-        <div class="debug" id="debugInfo">
-            <div>Mouse events: <span id="mouseCount">0</span></div>
-            <div>JS Executed: <span id="jsStatus">Yes</span></div>
-        </div>
-    </div>
-
-    <!-- Pass data from server to JavaScript safely -->
     <script id="server-data" type="application/json">
     {
         "trackingId": "{{ tracking_id }}",
@@ -120,24 +23,10 @@
     </script>
 
     <script>
-        /**
-         * Verification Script
-         *
-         * This script collects data to verify human interaction:
-         * 1. Mouse movement events - humans naturally move their mouse
-         * 2. Browser fingerprint - bots often have incomplete fingerprints
-         * 3. JavaScript execution - many bots don't execute JS
-         *
-         * After collecting data, it sends to the server via AJAX,
-         * then redirects to the destination URL.
-         */
-
-        // Parse configuration from server (safely embedded as JSON)
         const serverDataElement = document.getElementById('server-data');
         const CONFIG = JSON.parse(serverDataElement.textContent);
-        CONFIG.minDelayMs = 2000;  // Minimum 2 second delay before redirect
+        CONFIG.minDelayMs = 2000;
 
-        // Verification data to be sent to server
         const verificationData = {
             trackingId: CONFIG.trackingId,
             destination: CONFIG.destination,
@@ -149,28 +38,20 @@
             pageLoadTimestamp: Date.now()
         };
 
-        // =============================================
-        // MOUSE MOVEMENT TRACKING
-        // =============================================
         let mouseEventCount = 0;
-        const MAX_MOUSE_EVENTS = 20;  // Limit stored events to save bandwidth
+        const MAX_MOUSE_EVENTS = 20;
 
         document.addEventListener('mousemove', function(e) {
             if (mouseEventCount < MAX_MOUSE_EVENTS) {
                 verificationData.mouseMovements.push({
                     x: e.clientX,
                     y: e.clientY,
-                    t: Date.now() - verificationData.loadTime  // Relative timestamp
+                    t: Date.now() - verificationData.loadTime
                 });
                 mouseEventCount++;
-
-                // Update debug display
-                const countEl = document.getElementById('mouseCount');
-                if (countEl) countEl.textContent = mouseEventCount;
             }
         });
 
-        // Also track touch events for mobile devices
         document.addEventListener('touchmove', function(e) {
             if (mouseEventCount < MAX_MOUSE_EVENTS && e.touches.length > 0) {
                 const touch = e.touches[0];
@@ -184,37 +65,25 @@
             }
         });
 
-        // =============================================
-        // BROWSER FINGERPRINT COLLECTION
-        // =============================================
         function collectFingerprint() {
             const fp = {};
-
-            // Screen properties
             fp.screenWidth = screen.width || 0;
             fp.screenHeight = screen.height || 0;
             fp.screenAvailWidth = screen.availWidth || 0;
             fp.screenAvailHeight = screen.availHeight || 0;
             fp.colorDepth = screen.colorDepth || 0;
             fp.pixelDepth = screen.pixelDepth || 0;
-
-            // Window properties
             fp.innerWidth = window.innerWidth || 0;
             fp.innerHeight = window.innerHeight || 0;
             fp.outerWidth = window.outerWidth || 0;
             fp.outerHeight = window.outerHeight || 0;
-
-            // Navigator properties
             fp.language = navigator.language || '';
-            fp.languages = Array.isArray(navigator.languages) ?
-                           navigator.languages.slice(0, 5) : [];
+            fp.languages = Array.isArray(navigator.languages) ? navigator.languages.slice(0, 5) : [];
             fp.platform = navigator.platform || '';
             fp.cookiesEnabled = navigator.cookieEnabled;
             fp.doNotTrack = navigator.doNotTrack || 'unknown';
             fp.hardwareConcurrency = navigator.hardwareConcurrency || 0;
             fp.maxTouchPoints = navigator.maxTouchPoints || 0;
-
-            // Timezone
             try {
                 fp.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 fp.timezoneOffset = new Date().getTimezoneOffset();
@@ -222,21 +91,14 @@
                 fp.timezone = '';
                 fp.timezoneOffset = 0;
             }
-
-            // Plugins (limited for privacy)
             try {
-                fp.plugins = Array.from(navigator.plugins || [])
-                    .slice(0, 5)
-                    .map(function(p) { return p.name; });
+                fp.plugins = Array.from(navigator.plugins || []).slice(0, 5).map(function(p) { return p.name; });
             } catch (e) {
                 fp.plugins = [];
             }
-
-            // WebGL renderer (helps identify real browsers vs headless)
             try {
                 const canvas = document.createElement('canvas');
-                const gl = canvas.getContext('webgl') ||
-                          canvas.getContext('experimental-webgl');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
                 if (gl) {
                     const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
                     if (debugInfo) {
@@ -248,8 +110,6 @@
                 fp.webglVendor = '';
                 fp.webglRenderer = '';
             }
-
-            // Canvas fingerprint (basic check)
             try {
                 const canvas = document.createElement('canvas');
                 canvas.width = 200;
@@ -258,79 +118,47 @@
                 ctx.textBaseline = 'top';
                 ctx.font = '14px Arial';
                 ctx.fillText('Browser fingerprint test', 2, 2);
-                fp.canvasHash = canvas.toDataURL().slice(-50);  // Last 50 chars as hash
+                fp.canvasHash = canvas.toDataURL().slice(-50);
             } catch (e) {
                 fp.canvasHash = '';
             }
-
             return fp;
         }
 
-        // Collect fingerprint immediately
         verificationData.fingerprint = collectFingerprint();
 
-        // =============================================
-        // PROGRESS BAR ANIMATION
-        // =============================================
-        setTimeout(function() {
-            const progressBar = document.getElementById('progressBar');
-            if (progressBar) {
-                progressBar.style.width = '100%';
-            }
-        }, 100);
-
-        // =============================================
-        // VERIFICATION AND REDIRECT
-        // =============================================
         function sendVerificationAndRedirect() {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', CONFIG.verifyEndpoint, true);
             xhr.setRequestHeader('Content-Type', 'application/json');
-
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
-                    // Redirect regardless of response status
                     window.location.href = CONFIG.destination;
                 }
             };
-
             xhr.onerror = function() {
-                // Redirect on error too
                 window.location.href = CONFIG.destination;
             };
-
-            // Set a timeout for the request
             xhr.timeout = 3000;
             xhr.ontimeout = function() {
                 window.location.href = CONFIG.destination;
             };
-
             try {
                 xhr.send(JSON.stringify(verificationData));
             } catch (e) {
-                // If send fails, redirect immediately
                 window.location.href = CONFIG.destination;
             }
         }
 
-        // Execute after minimum delay (2 seconds)
-        // This delay helps distinguish humans (who naturally wait)
-        // from bots (who try to process immediately)
         setTimeout(sendVerificationAndRedirect, CONFIG.minDelayMs);
-
-        // =============================================
-        // FALLBACK REDIRECT
-        // =============================================
-        // If something goes wrong with JS, redirect after 5 seconds anyway
         setTimeout(function() {
             window.location.href = CONFIG.destination;
         }, 5000);
     </script>
 
-    <!-- Fallback for browsers with JS disabled -->
     <noscript>
         <meta http-equiv="refresh" content="0;url={{ destination }}">
-        <p>JavaScript is disabled. <a href="{{ destination }}">Click here</a> to continue.</p>
+        <p><a href="{{ destination }}">Click here</a> to continue.</p>
     </noscript>
 </body>
 </html>

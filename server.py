@@ -75,170 +75,25 @@ BROWSER_UA_PATTERNS = [
 
 BROWSER_UA_REGEX = re.compile("|".join(BROWSER_UA_PATTERNS), re.IGNORECASE)
 
-# These are partial ranges for major cloud providers
-# Requests from these IPs are likely automated scanners
+# Load datacenter CIDR ranges from file
+DATACENTERS_FILE = "datacenters.txt"
 
-DATACENTER_CIDRS = [
-    # Amazon AWS (partial list of common ranges)
-    "3.0.0.0/8",
-    "13.32.0.0/12",
-    "13.48.0.0/13",
-    "13.56.0.0/14",
-    "18.0.0.0/8",
-    "34.192.0.0/10",
-    "35.152.0.0/13",
-    "52.0.0.0/8",
-    "54.0.0.0/8",
-    "99.77.0.0/16",
-
-    # Microsoft Azure (partial list)
-    "13.64.0.0/11",
-    "13.96.0.0/13",
-    "13.104.0.0/14",
-    "20.0.0.0/8",
-    "40.64.0.0/10",
-    "51.104.0.0/14",
-    "52.224.0.0/11",
-    "104.40.0.0/13",
-    "137.116.0.0/15",
-    "168.61.0.0/16",
-
-    # Google Cloud Platform (partial list)
-    "34.64.0.0/10",
-    "35.184.0.0/13",
-    "35.192.0.0/12",
-    "35.208.0.0/12",
-    "35.224.0.0/12",
-    "35.240.0.0/13",
-    "104.154.0.0/15",
-    "104.196.0.0/14",
-    "130.211.0.0/16",
-    "146.148.0.0/17",
-
-    # DigitalOcean (partial list)
-    "104.131.0.0/16",
-    "104.236.0.0/16",
-    "107.170.0.0/16",
-    "138.68.0.0/16",
-    "139.59.0.0/16",
-    "159.65.0.0/16",
-    "159.89.0.0/16",
-    "161.35.0.0/16",
-    "162.243.0.0/16",
-    "164.90.0.0/16",
-    "165.22.0.0/16",
-    "167.99.0.0/16",
-    "178.62.0.0/16",
-    "188.166.0.0/16",
-
-    # Linode (partial list)
-    "45.33.0.0/16",
-    "45.56.0.0/16",
-    "45.79.0.0/16",
-    "50.116.0.0/16",
-    "66.175.208.0/20",
-    "69.164.192.0/18",
-    "72.14.176.0/20",
-    "74.207.224.0/19",
-    "96.126.96.0/19",
-    "97.107.128.0/17",
-    "139.162.0.0/16",
-    "172.104.0.0/15",
-    "173.230.128.0/17",
-    "173.255.192.0/18",
-    "192.155.80.0/20",
-    "198.58.96.0/19",
-    "198.74.48.0/20",
-
-    # Vultr (partial list)
-    "45.32.0.0/15",
-    "45.63.0.0/16",
-    "45.76.0.0/15",
-    "64.156.0.0/16",
-    "64.237.32.0/19",
-    "66.42.32.0/19",
-    "104.156.224.0/19",
-    "108.61.0.0/16",
-    "136.244.64.0/18",
-    "140.82.0.0/16",
-    "149.28.0.0/16",
-    "155.138.128.0/17",
-    "207.148.0.0/17",
-    "209.222.0.0/18",
-    "216.128.128.0/17",
-
-    # OVH (partial list)
-    "51.38.0.0/15",
-    "51.68.0.0/15",
-    "51.75.0.0/16",
-    "51.77.0.0/16",
-    "51.79.0.0/16",
-    "51.81.0.0/16",
-    "51.83.0.0/16",
-    "51.89.0.0/16",
-    "51.91.0.0/16",
-    "54.36.0.0/14",
-    "54.37.0.0/16",
-    "54.38.0.0/16",
-    "135.125.0.0/16",
-    "141.94.0.0/15",
-    "145.239.0.0/16",
-    "146.59.0.0/16",
-    "147.135.0.0/16",
-    "149.202.0.0/16",
-    "151.80.0.0/16",
-    "158.69.0.0/16",
-    "164.132.0.0/16",
-    "167.114.0.0/16",
-    "176.31.0.0/16",
-    "178.32.0.0/15",
-    "185.228.0.0/16",
-    "188.165.0.0/16",
-    "192.95.0.0/16",
-    "192.99.0.0/16",
-    "193.70.0.0/16",
-    "198.27.64.0/18",
-    "198.100.144.0/20",
-    "198.245.48.0/20",
-
-    # Hetzner (partial list)
-    "5.9.0.0/16",
-    "23.88.0.0/15",
-    "46.4.0.0/16",
-    "78.46.0.0/15",
-    "88.198.0.0/16",
-    "88.99.0.0/16",
-    "94.130.0.0/16",
-    "95.216.0.0/15",
-    "116.202.0.0/15",
-    "116.203.0.0/16",
-    "128.140.0.0/16",
-    "135.181.0.0/16",
-    "136.243.0.0/16",
-    "138.201.0.0/16",
-    "142.132.128.0/17",
-    "144.76.0.0/16",
-    "148.251.0.0/16",
-    "157.90.0.0/16",
-    "159.69.0.0/16",
-    "162.55.0.0/16",
-    "167.235.0.0/16",
-    "168.119.0.0/16",
-    "176.9.0.0/16",
-    "178.63.0.0/16",
-    "188.40.0.0/16",
-    "195.201.0.0/16",
-    "213.133.96.0/19",
-    "213.239.192.0/18",
-]
-
-# Pre-compile IP networks for efficient lookup
-DATACENTER_NETWORKS = []
-for cidr in DATACENTER_CIDRS:
+def load_datacenter_networks():
+    networks = []
     try:
-        DATACENTER_NETWORKS.append(ipaddress.ip_network(cidr, strict=False))
-    except ValueError:
-        pass  # Skip invalid CIDRs
+        with open(DATACENTERS_FILE, "r") as f:
+            for line in f:
+                cidr = line.strip()
+                if cidr:
+                    try:
+                        networks.append(ipaddress.ip_network(cidr, strict=False))
+                    except ValueError:
+                        pass  # Skip invalid CIDRs
+    except FileNotFoundError:
+        print(f"[WARNING] {DATACENTERS_FILE} not found, datacenter IP detection disabled")
+    return networks
+
+DATACENTER_NETWORKS = load_datacenter_networks()
 
 # IP lookup cache to avoid repeated API calls
 IP_CACHE: Dict[str, str] = {}
@@ -429,14 +284,16 @@ async def analyze_request(
     reasons_bot = []
     reasons_human = []
 
-    if BOT_UA_REGEX.search(user_agent):
-        reasons_bot.append(f"Bot UA pattern detected")
-    elif BROWSER_UA_REGEX.search(user_agent):
-        reasons_human.append("Standard browser User-Agent")
-    elif not user_agent or user_agent.strip() == "":
-        reasons_bot.append("Empty User-Agent")
-    else:
-        reasons_bot.append(f"Unusual User-Agent")
+    # User agent detection only for verification link, not for pixel tracking
+    if has_js_verification:
+        if BOT_UA_REGEX.search(user_agent):
+            reasons_bot.append(f"Bot UA pattern detected")
+        elif BROWSER_UA_REGEX.search(user_agent):
+            reasons_human.append("Standard browser User-Agent")
+        elif not user_agent or user_agent.strip() == "":
+            reasons_bot.append("Empty User-Agent")
+        else:
+            reasons_bot.append(f"Unusual User-Agent")
 
     if method == "HEAD":
         reasons_bot.append("HEAD request (typical of link scanners)")
