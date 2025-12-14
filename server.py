@@ -568,8 +568,7 @@ async def generate_tracking_urls(request: Request, dest: str = "https://example.
         "click_url": f"{base_url}/click/{tracking_id}?t={sent_timestamp}&dest={encoded_dest}",
         "destination": dest,
         "usage": {
-            "pixel": "Embed as <img> tag in email to track opens",
-            "click": "Use as href in links to track clicks"
+            "email": "<img src='{pixel_url}' width='1' height='1' style='display:none;' alt='' /><a href='{click_url}'>Click here</a>",
         }
     }
 
