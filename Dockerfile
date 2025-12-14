@@ -14,6 +14,6 @@ COPY datacenters.txt .
 # Create directories for data and logs
 RUN mkdir -p data logs
 
-EXPOSE 8000
+EXPOSE $PORT
 
 CMD ["python", "server.py"]
